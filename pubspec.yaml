@@ -1,0 +1,49 @@
+name: body_controller_app
+description: 个人健身App - 支持跑步和力量训练记录，AI教练分析
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  
+  # 状态管理
+  flutter_riverpod: ^2.4.9
+  riverpod_annotation: ^2.3.3
+  
+  # 本地存储
+  drift: ^2.14.1
+  sqlite3_flutter_libs: ^3.1.1
+  path_provider: ^2.1.1
+  path: ^1.8.3
+  
+  # UI组件
+  fl_chart: ^0.66.0
+  
+  # 阿里云百炼
+  dashscope: ^0.0.3
+  
+  # 其他工具
+  intl: ^0.18.1
+  shared_preferences: ^2.2.2
+  uuid: ^4.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  build_runner: ^2.4.6
+  drift_dev: ^2.14.1
+  riverpod_generator: ^2.3.9
+  riverpod_lint: ^2.3.7
+  custom_lint: ^0.5.7
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
