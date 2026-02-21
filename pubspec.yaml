@@ -17,15 +17,12 @@ dependencies:
   
   # 本地存储
   drift: ^2.14.1
-  sqlite3_flutter_libs: ^3.1.1
+  sqlite3_flutter_libs: ^0.6.0+eol
   path_provider: ^2.1.1
   path: ^1.8.3
   
   # UI组件
   fl_chart: ^0.66.0
-  
-  # 阿里云百炼
-  dashscope: ^0.0.3
   
   # 其他工具
   intl: ^0.18.1
