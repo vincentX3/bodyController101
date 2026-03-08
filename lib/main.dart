@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'data/providers/providers.dart';
 import 'presentation/screens/records_list_screen.dart';
 import 'presentation/screens/goals_screen.dart';
 import 'presentation/screens/ai_coach_screen.dart';
@@ -67,8 +68,8 @@ class MainScreen extends ConsumerWidget {
             label: '记录',
           ),
           NavigationDestination(
-            icon: Icon(Icons.flag),
-            selectedIcon: Icon(Icons.flag_filled),
+            icon: Icon(Icons.flag_outlined),
+            selectedIcon: Icon(Icons.flag),
             label: '目标',
           ),
           NavigationDestination(

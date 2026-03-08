@@ -1,4 +1,3 @@
-import '../database/database.dart';
 import '../database/database_manager.dart';
 
 class RunRepository {
@@ -58,14 +57,14 @@ class RunRepository {
   // 计算本周跑量
   Future<double> getWeekTotalDistance(DateTime weekStart) async {
     final records = await getWeekRunRecords(weekStart);
-    return records.fold(0.0, (sum, record) => sum + record.distance);
+    return records.fold<double>(0.0, (sum, record) => sum + record.distance);
   }
 
   // 获取上周跑量
   Future<double> getLastWeekTotalDistance(DateTime weekStart) async {
     final lastWeekStart = weekStart.subtract(const Duration(days: 7));
     final records = await getWeekRunRecords(lastWeekStart);
-    return records.fold(0.0, (sum, record) => sum + record.distance);
+    return records.fold<double>(0.0, (sum, record) => sum + record.distance);
   }
 
   // 获取最长距离

@@ -5,6 +5,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'database.dart';
 
+export 'package:drift/drift.dart';
+
 part 'database_manager.g.dart';
 
 @DriftDatabase(tables: [

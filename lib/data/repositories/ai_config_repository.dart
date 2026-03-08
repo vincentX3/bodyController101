@@ -1,4 +1,3 @@
-import '../database/database.dart';
 import '../database/database_manager.dart';
 
 class AIConfigRepository {
@@ -10,10 +9,10 @@ class AIConfigRepository {
     required String provider,
   }) async {
     // 先删除旧配置
-    await _db.delete(_db.aiConfigs).go();
+    await _db.delete(_db.aIConfigs).go();
     
-    return await _db.into(_db.aiConfigs).insert(
-      AIConfigsCompanion.insert(
+    return await _db.into(_db.aIConfigs).insert(
+    AIConfigsCompanion.insert(
         apiKey: apiKey,
         provider: provider,
       ),
@@ -22,7 +21,7 @@ class AIConfigRepository {
 
   // 获取AI配置
   Future<AIConfig?> getAIConfig() async {
-    final configs = await _db.select(_db.aiConfigs).get();
+    final configs = await _db.select(_db.aIConfigs).get();
     if (configs.isEmpty) return null;
     return configs.first;
   }
@@ -41,6 +40,6 @@ class AIConfigRepository {
 
   // 删除AI配置
   Future<void> deleteAIConfig() async {
-    await _db.delete(_db.aiConfigs).go();
+    await _db.delete(_db.aIConfigs).go();
   }
 }

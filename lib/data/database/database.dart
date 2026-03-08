@@ -1,7 +1,5 @@
 import 'package:drift/drift.dart';
 
-part 'database.g.dart';
-
 // 跑步记录表
 @DataClassName('RunRecord')
 class RunRecords extends Table {
@@ -30,7 +28,7 @@ class StrengthRecords extends Table {
 @DataClassName('ExerciseSet')
 class ExerciseSets extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get strengthRecordId => integer().references(StrengthRecords, onDelete: KeyAction.cascade)();
+  IntColumn get strengthRecordId => integer().references(StrengthRecords, #id, onDelete: KeyAction.cascade)();
   TextColumn get exerciseName => text()(); // 动作名称
   IntColumn get setNumber => integer()(); // 第几组
   RealColumn get weight => real()(); // 重量 kg
@@ -47,7 +45,7 @@ class Goals extends Table {
   DateTimeColumn? get targetDate => dateTime().nullable()(); // 目标日期（半马）
   TextColumn? get targetValue => text().nullable()(); // 目标值（如 "1:30:00" 或 "100kg"）
   TextColumn? get currentValue => text().nullable()(); // 当前值
-  boolColumn get isCompleted => boolean().withDefault(const Constant(false))();
+  BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -60,28 +58,4 @@ class AIConfigs extends Table {
   TextColumn get provider => text()(); // 提供商：dashscope
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
-}
-
-// 数据库类
-@DriftDatabase(tables: [
-  RunRecords,
-  StrengthRecords,
-  ExerciseSets,
-  Goals,
-  AIConfigs,
-])
-class AppDatabase extends _$AppDatabase {
-  AppDatabase(QueryExecutor e) : super(e);
-
-  @override
-  int get schemaVersion => 1;
-
-  @override
-  MigrationStrategy get migration {
-    return MigrationStrategy(
-      onCreate: (Migrator m) async {
-        await m.createAll();
-      },
-    );
-  }
 }

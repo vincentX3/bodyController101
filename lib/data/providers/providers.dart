@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../database/database_manager.dart';
 import '../repositories/run_repository.dart';
 import '../repositories/strength_repository.dart';
 import '../repositories/goal_repository.dart';

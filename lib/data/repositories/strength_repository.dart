@@ -1,4 +1,3 @@
-import '../database/database.dart';
 import '../database/database_manager.dart';
 
 class StrengthRepository {
