@@ -953,3 +953,44 @@ Kotlin 编译器使用增量编译，将编译状态保存在缓存文件中。当：
 1. 清理项目编译缓存
 2. 重新编译安装到真机
 
+
+---
+
+## ?? Kotlin增量编译问题修复（2026-03-08 续）
+
+### 问题现象
+`
+IllegalArgumentException: this and base files have different roots:
+C:\Users\...\shared_preferences_android-2.4.20\android\...
+和 D:\bodyController101\android
+`
+
+### 问题原因
+- Pub Cache 位于 C: 盘
+- 项目位于 D: 盘
+- Kotlin增量编译无法处理跨驱动器的相对路径
+
+### 解决方案
+在 ndroid/gradle.properties 中添加：
+`properties
+kotlin.incremental=false
+`
+
+### 镜像配置局限性
+
+| 依赖类型 | 镜像来源 | 说明 |
+|----------|----------|------|
+| Gradle本体 | 腾讯云 | ? 已配置 |
+| AndroidX/Kotlin | 阿里云 | ? 已配置 |
+| Flutter嵌入库 | Google官方 | ?? 无国内镜像 |
+
+**说明：** io.flutter:flutter_embedding_debug 等Flutter原生库只存在于Google Maven仓库，阿里云未同步。这是Flutter项目的固有限制。
+
+### 当前状态
+
+| 项目 | 状态 |
+|------|------|
+| 代码修复 | ? 完成 |
+| Git提交 | ? 待执行 |
+| APK构建 | ? 进行中 |
+
