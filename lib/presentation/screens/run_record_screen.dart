@@ -90,7 +90,8 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('跑步记录已保存')),
         );
-        _clearForm();
+        // 返回列表页并传递true表示有新数据
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
@@ -236,7 +237,7 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
                               onChanged: (_) => _calculatePace(),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return '必填';
+                                  return null; // 可选字段，允许为空
                                 }
                                 final seconds = int.tryParse(value);
                                 if (seconds == null || seconds < 0 || seconds >= 60) {

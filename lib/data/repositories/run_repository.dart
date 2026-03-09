@@ -43,6 +43,16 @@ class RunRepository {
         .get();
   }
 
+  // 按日期范围获取跑步记录
+  Future<List<RunRecord>> getRunRecordsByDateRange(DateTime start, DateTime end) async {
+    return await (_db.select(_db.runRecords)
+          ..where((t) => t.date.isBiggerOrEqualValue(start))
+          ..where((t) => t.date.isSmallerThanValue(end))
+          ..orderBy([(t) => OrderingTerm.desc(t.date)])
+        )
+        .get();
+  }
+
   // 获取本月跑步记录
   Future<List<RunRecord>> getMonthRunRecords(DateTime monthStart) async {
     final monthEnd = DateTime(monthStart.year, monthStart.month + 1, 1);

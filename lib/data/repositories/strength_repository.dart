@@ -47,6 +47,27 @@ class StrengthRepository {
         .get();
   }
 
+  // 按日期范围获取力量训练记录
+  Future<List<StrengthRecord>> getStrengthRecordsByDateRange(DateTime start, DateTime end) async {
+    return await (_db.select(_db.strengthRecords)
+          ..where((t) => t.date.isBiggerOrEqualValue(start))
+          ..where((t) => t.date.isSmallerThanValue(end))
+          ..orderBy([(t) => OrderingTerm.desc(t.date)])
+        )
+        .get();
+  }
+
+  // 获取本周力量训练记录
+  Future<List<StrengthRecord>> getWeekStrengthRecords(DateTime weekStart) async {
+    final weekEnd = weekStart.add(const Duration(days: 7));
+    return await (_db.select(_db.strengthRecords)
+          ..where((t) => t.date.isBiggerOrEqualValue(weekStart))
+          ..where((t) => t.date.isSmallerThanValue(weekEnd))
+          ..orderBy([(t) => OrderingTerm.asc(t.date)])
+        )
+        .get();
+  }
+
   // 根据ID获取力量训练记录及其动作组
   Future<Map<String, dynamic>?> getStrengthRecordWithSets(int id) async {
     final record = await (_db.select(_db.strengthRecords)

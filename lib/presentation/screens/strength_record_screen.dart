@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../data/providers/providers.dart';
@@ -44,6 +45,162 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
   };
 
   final Map<String, bool> _selectedExercises = {};
+
+  // 重量选项 (0.5kg 步进，从2.5kg到300kg)
+  List<double> get _weightOptions {
+    return [for (double w = 2.5; w <= 300; w += 2.5) w];
+  }
+
+  // 次数选项 (1-50次)
+  List<int> get _repsOptions {
+    return [for (int r = 1; r <= 50; r++) r];
+  }
+
+  // RPE选项 (6-10)
+  List<int> get _rpeOptions {
+    return [for (int r = 6; r <= 10; r++) r];
+  }
+
+  // 显示滚轮选择器对话框
+  Future<double?> _showWeightPicker(BuildContext context, double initialValue) async {
+    double selectedValue = initialValue > 0 ? initialValue : 20.0;
+    int initialIndex = _weightOptions.indexOf(selectedValue);
+    if (initialIndex < 0) {
+      // 找最接近的值
+      for (int i = 0; i < _weightOptions.length; i++) {
+        if (_weightOptions[i] >= selectedValue) {
+          initialIndex = i;
+          break;
+        }
+      }
+    }
+
+    return await showDialog<double>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('选择重量'),
+          content: SizedBox(
+            height: 200,
+            width: 200,
+            child: CupertinoPicker(
+              itemExtent: 40,
+              scrollController: FixedExtentScrollController(initialItem: initialIndex),
+              onSelectedItemChanged: (index) {
+                selectedValue = _weightOptions[index];
+              },
+              children: _weightOptions.map((weight) {
+                return Center(
+                  child: Text(
+                    '${weight.toStringAsFixed(1)} kg',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, selectedValue),
+              child: const Text('确定'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 显示次数滚轮选择器
+  Future<int?> _showRepsPicker(BuildContext context, int initialValue) async {
+    int selectedValue = initialValue > 0 ? initialValue : 10;
+    int initialIndex = selectedValue - 1;
+
+    return await showDialog<int>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('选择次数'),
+          content: SizedBox(
+            height: 200,
+            width: 150,
+            child: CupertinoPicker(
+              itemExtent: 40,
+              scrollController: FixedExtentScrollController(initialItem: initialIndex),
+              onSelectedItemChanged: (index) {
+                selectedValue = _repsOptions[index];
+              },
+              children: _repsOptions.map((reps) {
+                return Center(
+                  child: Text(
+                    '$reps 次',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, selectedValue),
+              child: const Text('确定'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 显示RPE滚轮选择器
+  Future<int?> _showRpePicker(BuildContext context, int? initialValue) async {
+    int selectedValue = initialValue ?? 8;
+    int initialIndex = selectedValue - 6;
+
+    return await showDialog<int>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('选择RPE'),
+          content: SizedBox(
+            height: 200,
+            width: 150,
+            child: CupertinoPicker(
+              itemExtent: 40,
+              scrollController: FixedExtentScrollController(initialItem: initialIndex),
+              onSelectedItemChanged: (index) {
+                selectedValue = _rpeOptions[index];
+              },
+              children: _rpeOptions.map((rpe) {
+                return Center(
+                  child: Text(
+                    'RPE $rpe',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, selectedValue),
+              child: const Text('确定'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -216,78 +373,106 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          // 重量
+          // 重量选择器
           Expanded(
-            child: TextField(
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
-                labelText: '重量',
-                suffixText: 'kg',
-                border: OutlineInputBorder(),
-                isDense: true,
-              ),
-              controller: TextEditingController(
-                text: setData['weight'] == 0.0 ? '' : setData['weight'].toString(),
-              )..selection = TextSelection.fromPosition(
-                  TextPosition(offset: TextEditingController(text: setData['weight'] == 0.0 ? '' : setData['weight'].toString()).text.length),
-                ),
-              onChanged: (value) {
-                final weight = double.tryParse(value) ?? 0.0;
-                setState(() {
-                  _exerciseData[exerciseName]![setIndex]['weight'] = weight;
-                });
+            child: InkWell(
+              onTap: () async {
+                final weight = await _showWeightPicker(context, setData['weight'] ?? 0.0);
+                if (weight != null) {
+                  setState(() {
+                    _exerciseData[exerciseName]![setIndex]['weight'] = weight;
+                  });
+                }
               },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      setData['weight'] == 0.0 ? '选择重量' : '${setData['weight'].toStringAsFixed(1)} kg',
+                      style: TextStyle(
+                        color: setData['weight'] == 0.0 ? Colors.grey : null,
+                      ),
+                    ),
+                    const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                  ],
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 8),
-          // 次数
+          // 次数选择器
           Expanded(
-            child: TextField(
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: '次数',
-                border: OutlineInputBorder(),
-                isDense: true,
-              ),
-              controller: TextEditingController(
-                text: setData['reps'] == 0 ? '' : setData['reps'].toString(),
-              )..selection = TextSelection.fromPosition(
-                  TextPosition(offset: TextEditingController(text: setData['reps'] == 0 ? '' : setData['reps'].toString()).text.length),
-                ),
-              onChanged: (value) {
-                final reps = int.tryParse(value) ?? 0;
-                setState(() {
-                  _exerciseData[exerciseName]![setIndex]['reps'] = reps;
-                });
+            child: InkWell(
+              onTap: () async {
+                final reps = await _showRepsPicker(context, setData['reps'] ?? 0);
+                if (reps != null) {
+                  setState(() {
+                    _exerciseData[exerciseName]![setIndex]['reps'] = reps;
+                  });
+                }
               },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      setData['reps'] == 0 ? '选择次数' : '${setData['reps']} 次',
+                      style: TextStyle(
+                        color: setData['reps'] == 0 ? Colors.grey : null,
+                      ),
+                    ),
+                    const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                  ],
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 8),
-          // RPE
+          // RPE选择器
           SizedBox(
-            width: 60,
-            child: TextField(
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'RPE',
-                hintText: '1-10',
-                border: OutlineInputBorder(),
-                isDense: true,
-              ),
-              controller: TextEditingController(
-                text: setData['rpe']?.toString() ?? '',
-              )..selection = TextSelection.fromPosition(
-                  TextPosition(offset: TextEditingController(text: setData['rpe']?.toString() ?? '').text.length),
-                ),
-              onChanged: (value) {
-                final rpe = int.tryParse(value);
-                setState(() {
-                  _exerciseData[exerciseName]![setIndex]['rpe'] = rpe;
-                });
+            width: 70,
+            child: InkWell(
+              onTap: () async {
+                final rpe = await _showRpePicker(context, setData['rpe']);
+                if (rpe != null) {
+                  setState(() {
+                    _exerciseData[exerciseName]![setIndex]['rpe'] = rpe;
+                  });
+                }
               },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      setData['rpe'] == null ? 'RPE' : 'RPE ${setData['rpe']}',
+                      style: TextStyle(
+                        color: setData['rpe'] == null ? Colors.grey : null,
+                      ),
+                    ),
+                    const Icon(Icons.arrow_drop_down, color: Colors.grey, size: 16),
+                  ],
+                ),
+              ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
           // 删除按钮
           IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.red),
@@ -296,6 +481,8 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
                 _exerciseData[exerciseName]!.removeAt(setIndex);
               });
             },
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            padding: EdgeInsets.zero,
           ),
         ],
       ),
@@ -382,7 +569,8 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('力量训练记录已保存，总容量：${totalVolume.toStringAsFixed(0)}kg')),
         );
-        _clearForm();
+        // 返回列表页并传递true表示有新数据
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {

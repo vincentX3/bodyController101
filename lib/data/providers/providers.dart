@@ -39,6 +39,20 @@ final allRunRecordsProvider = FutureProvider((ref) async {
   return repo.getAllRunRecords();
 });
 
+// 今日跑步记录Provider
+final todayRunRecordsProvider = FutureProvider((ref) async {
+  final repo = ref.watch(runRepositoryProvider);
+  final today = DateTime.now();
+  final todayStart = DateTime(today.year, today.month, today.day);
+  return repo.getRunRecordsByDateRange(todayStart, todayStart.add(const Duration(days: 1)));
+});
+
+// 今日跑步距离Provider
+final todayRunDistanceProvider = FutureProvider((ref) async {
+  final records = await ref.watch(todayRunRecordsProvider.future);
+  return records.fold<double>(0.0, (sum, record) => sum + record.distance);
+});
+
 // 本周跑步记录Provider
 final weekRunRecordsProvider = FutureProvider.family((ref, DateTime weekStart) async {
   final repo = ref.watch(runRepositoryProvider);
@@ -55,6 +69,35 @@ final weekTotalDistanceProvider = FutureProvider.family((ref, DateTime weekStart
 final allStrengthRecordsProvider = FutureProvider((ref) async {
   final repo = ref.watch(strengthRepositoryProvider);
   return repo.getAllStrengthRecords();
+});
+
+// 今日力量训练Provider
+final todayStrengthRecordsProvider = FutureProvider((ref) async {
+  final repo = ref.watch(strengthRepositoryProvider);
+  final today = DateTime.now();
+  final todayStart = DateTime(today.year, today.month, today.day);
+  return repo.getStrengthRecordsByDateRange(todayStart, todayStart.add(const Duration(days: 1)));
+});
+
+// 今日力量训练次数Provider
+final todayStrengthCountProvider = FutureProvider((ref) async {
+  final records = await ref.watch(todayStrengthRecordsProvider.future);
+  return records.length;
+});
+
+// 本周训练天数Provider
+final weekTrainingDaysProvider = FutureProvider.family((ref, DateTime weekStart) async {
+  final runRecords = await ref.watch(weekRunRecordsProvider(weekStart).future);
+  final strengthRecords = await ref.watch(strengthRepositoryProvider).getWeekStrengthRecords(weekStart);
+  
+  final trainingDays = <DateTime>{};
+  for (var record in runRecords) {
+    trainingDays.add(DateTime(record.date.year, record.date.month, record.date.day));
+  }
+  for (var record in strengthRecords) {
+    trainingDays.add(DateTime(record.date.year, record.date.month, record.date.day));
+  }
+  return trainingDays.length;
 });
 
 // 目标Provider

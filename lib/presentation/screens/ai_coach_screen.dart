@@ -11,11 +11,19 @@ class AICoachScreen extends ConsumerStatefulWidget {
 }
 
 class _AICoachScreenState extends ConsumerState<AICoachScreen> {
-  final List<String> _conversationHistory = [];
+  final List<Map<String, String>> _conversationHistory = [];
   int _questionCount = 0;
   final int _maxQuestions = 3;
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool _isLoading = false;
+  String _selectedModel = 'qwen-turbo';
+
+  final List<Map<String, String>> _modelOptions = [
+    {'value': 'qwen-turbo', 'label': 'Qwen-Turbo（快速）'},
+    {'value': 'qwen-plus', 'label': 'Qwen-Plus（平衡）'},
+    {'value': 'qwen-max', 'label': 'Qwen-Max（强大）'},
+  ];
 
   @override
   void dispose() {
@@ -55,7 +63,7 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
             Icon(
               Icons.psychology_outlined,
               size: 100,
-              color: Colors.grey[400],
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
             ),
             const SizedBox(height: 24),
             const Text(
@@ -70,6 +78,14 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
                 color: Colors.grey[600],
               ),
               textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '获取API Key：dashscope.console.aliyun.com',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[500],
+              ),
             ),
             const SizedBox(height: 32),
             FilledButton.icon(
@@ -106,7 +122,7 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: _generateInsights,
+                  onPressed: _isLoading ? null : _generateInsights,
                   icon: const Icon(Icons.insights),
                   label: const Text('数据洞察'),
                 ),
@@ -114,7 +130,7 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: _generatePlan,
+                  onPressed: _isLoading ? null : _generatePlan,
                   icon: const Icon(Icons.calendar_today),
                   label: const Text('生成计划'),
                 ),
@@ -159,10 +175,10 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
                   padding: const EdgeInsets.all(16),
                   itemCount: _conversationHistory.length,
                   itemBuilder: (context, index) {
-                    final isUser = index % 2 == 0;
+                    final msg = _conversationHistory[index];
                     return _buildMessageBubble(
-                      _conversationHistory[index],
-                      isUser,
+                      msg['content']!,
+                      msg['role'] == 'user',
                     );
                   },
                 ),
@@ -172,13 +188,27 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
         if (_questionCount > 0)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(
-              '剩余提问次数：${_maxQuestions - _questionCount}',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.info_outline, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(
+                  '剩余追问次数：${_maxQuestions - _questionCount}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
             ),
+          ),
+
+        // 加载指示器
+        if (_isLoading)
+          const Padding(
+            padding: EdgeInsets.all(8),
+            child: LinearProgressIndicator(),
           ),
 
         // 输入框
@@ -201,17 +231,23 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
                   controller: _messageController,
                   decoration: InputDecoration(
                     hintText: _questionCount >= _maxQuestions
-                        ? '提问次数已用完'
+                        ? '追问次数已用完，请重新生成'
                         : '输入问题或调整建议...',
                     border: const OutlineInputBorder(),
-                    enabled: _questionCount < _maxQuestions,
+                    enabled: _questionCount < _maxQuestions && !_isLoading,
                   ),
                   maxLines: null,
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) {
+                    if (_questionCount < _maxQuestions && !_isLoading) {
+                      _sendMessage();
+                    }
+                  },
                 ),
               ),
               const SizedBox(width: 12),
               IconButton.filled(
-                onPressed: _questionCount < _maxQuestions
+                onPressed: _questionCount < _maxQuestions && !_isLoading
                     ? _sendMessage
                     : null,
                 icon: const Icon(Icons.send),
@@ -228,11 +264,13 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser) ...[
             CircleAvatar(
+              radius: 16,
               backgroundColor: Theme.of(context).colorScheme.primary,
-              child: const Icon(Icons.psychology, color: Colors.white),
+              child: const Icon(Icons.psychology, color: Colors.white, size: 20),
             ),
             const SizedBox(width: 8),
           ],
@@ -245,12 +283,13 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
                     : Theme.of(context).colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Text(
+              child: SelectableText(
                 message,
                 style: TextStyle(
                   color: isUser
                       ? Theme.of(context).colorScheme.onPrimaryContainer
                       : Theme.of(context).colorScheme.onSurfaceVariant,
+                  height: 1.5,
                 ),
               ),
             ),
@@ -258,8 +297,9 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
           if (isUser) ...[
             const SizedBox(width: 8),
             CircleAvatar(
+              radius: 16,
               backgroundColor: Theme.of(context).colorScheme.secondary,
-              child: const Icon(Icons.person, color: Colors.white),
+              child: const Icon(Icons.person, color: Colors.white, size: 20),
             ),
           ],
         ],
@@ -269,48 +309,60 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
 
   Future<void> _generateInsights() async {
     setState(() {
-      _conversationHistory.add('生成数据洞察');
-      _conversationHistory.add('正在分析您的训练数据...');
+      _isLoading = true;
+      _conversationHistory.clear();
+      _questionCount = 0;
+      _conversationHistory.add({'role': 'user', 'content': '生成数据洞察'});
+      _conversationHistory.add({'role': 'assistant', 'content': '正在分析您的训练数据...'});
     });
 
     try {
       final aiService = ref.read(aiServiceProvider);
+      aiService.setModel(_selectedModel);
       final insights = await aiService.generateInsights();
 
       setState(() {
         _conversationHistory.removeLast();
-        _conversationHistory.add(insights);
+        _conversationHistory.add({'role': 'assistant', 'content': insights});
+        _isLoading = false;
       });
 
       _scrollToBottom();
     } catch (e) {
       setState(() {
         _conversationHistory.removeLast();
-        _conversationHistory.add('生成洞察时出错：$e');
+        _conversationHistory.add({'role': 'assistant', 'content': '生成洞察时出错：$e'});
+        _isLoading = false;
       });
     }
   }
 
   Future<void> _generatePlan() async {
     setState(() {
-      _conversationHistory.add('生成训练计划');
-      _conversationHistory.add('正在为您制定下周训练计划...');
+      _isLoading = true;
+      _conversationHistory.clear();
+      _questionCount = 0;
+      _conversationHistory.add({'role': 'user', 'content': '生成训练计划'});
+      _conversationHistory.add({'role': 'assistant', 'content': '正在为您制定下周训练计划...'});
     });
 
     try {
       final aiService = ref.read(aiServiceProvider);
+      aiService.setModel(_selectedModel);
       final plan = await aiService.generatePlan();
 
       setState(() {
         _conversationHistory.removeLast();
-        _conversationHistory.add(plan);
+        _conversationHistory.add({'role': 'assistant', 'content': plan});
+        _isLoading = false;
       });
 
       _scrollToBottom();
     } catch (e) {
       setState(() {
         _conversationHistory.removeLast();
-        _conversationHistory.add('生成计划时出错：$e');
+        _conversationHistory.add({'role': 'assistant', 'content': '生成计划时出错：$e'});
+        _isLoading = false;
       });
     }
   }
@@ -320,8 +372,9 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
     if (message.isEmpty) return;
 
     setState(() {
-      _conversationHistory.add(message);
-      _conversationHistory.add('正在思考...');
+      _isLoading = true;
+      _conversationHistory.add({'role': 'user', 'content': message});
+      _conversationHistory.add({'role': 'assistant', 'content': '正在思考...'});
       _questionCount++;
       _messageController.clear();
     });
@@ -330,21 +383,28 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
 
     try {
       final aiService = ref.read(aiServiceProvider);
-      final response = await aiService.chat(
-        message,
-        conversationHistory: _conversationHistory.sublist(0, _conversationHistory.length - 1),
-      );
+      aiService.setModel(_selectedModel);
+      
+      // 提取对话历史（排除最后两条）
+      final history = _conversationHistory
+          .sublist(0, _conversationHistory.length - 1)
+          .map((m) => m['content']!)
+          .toList();
+      
+      final response = await aiService.chat(message, conversationHistory: history);
 
       setState(() {
         _conversationHistory.removeLast();
-        _conversationHistory.add(response);
+        _conversationHistory.add({'role': 'assistant', 'content': response});
+        _isLoading = false;
       });
 
       _scrollToBottom();
     } catch (e) {
       setState(() {
         _conversationHistory.removeLast();
-        _conversationHistory.add('回复时出错：$e');
+        _conversationHistory.add({'role': 'assistant', 'content': '回复时出错：$e'});
+        _isLoading = false;
       });
     }
   }
@@ -366,67 +426,92 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
     final apiKeyController = TextEditingController(
       text: aiConfigState.apiKey ?? '',
     );
+    String tempModel = _selectedModel;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('AI配置'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('阿里云百炼API Key'),
-            const SizedBox(height: 8),
-            TextField(
-              controller: apiKeyController,
-              decoration: const InputDecoration(
-                hintText: 'sk-xxxxxxxxxxxxxxxxxxxxxxxx',
-                border: OutlineInputBorder(),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('AI配置'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('阿里云百炼API Key'),
+              const SizedBox(height: 8),
+              TextField(
+                controller: apiKeyController,
+                decoration: const InputDecoration(
+                  hintText: 'sk-xxxxxxxxxxxxxxxxxxxxxxxx',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
               ),
-              obscureText: true,
-              maxLines: 2,
+              const SizedBox(height: 16),
+              const Text('模型选择'),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: tempModel,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                ),
+                items: _modelOptions.map((opt) {
+                  return DropdownMenuItem(
+                    value: opt['value'],
+                    child: Text(opt['label']!),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setDialogState(() {
+                    tempModel = value!;
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '获取API Key：dashscope.console.aliyun.com',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消'),
             ),
-            const SizedBox(height: 12),
-            const Text(
-              '获取API Key：访问阿里云百炼控制台',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+            FilledButton(
+              onPressed: () async {
+                final apiKey = apiKeyController.text.trim();
+                if (apiKey.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('请输入API Key')),
+                  );
+                  return;
+                }
+
+                try {
+                  await ref.read(aiConfigStateProvider.notifier).saveAPIKey(apiKey);
+                  setState(() {
+                    _selectedModel = tempModel;
+                  });
+                  if (mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('配置已保存')),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('保存失败：$e')),
+                    );
+                  }
+                }
+              },
+              child: const Text('保存'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              final apiKey = apiKeyController.text.trim();
-              if (apiKey.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('请输入API Key')),
-                );
-                return;
-              }
-
-              try {
-                await ref.read(aiConfigStateProvider.notifier).saveAPIKey(apiKey);
-                if (mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('API Key已保存')),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('保存失败：$e')),
-                  );
-                }
-              }
-            },
-            child: const Text('保存'),
-          ),
-        ],
       ),
     );
   }

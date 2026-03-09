@@ -52,17 +52,23 @@ class _RecordsListScreenState extends ConsumerState<RecordsListScreen>
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
+        onPressed: () async {
           if (_tabController.index == 0) {
-            Navigator.push(
+            final result = await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const RunRecordScreen()),
             );
+            if (result == true) {
+              ref.invalidate(allRunRecordsProvider);
+            }
           } else {
-            Navigator.push(
+            final result = await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const StrengthRecordScreen()),
             );
+            if (result == true) {
+              ref.invalidate(allStrengthRecordsProvider);
+            }
           }
         },
         child: const Icon(Icons.add),

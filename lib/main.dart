@@ -175,9 +175,8 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildTodayStats(BuildContext context, WidgetRef ref) {
-    final today = DateTime.now();
-    final todayStart = DateTime(today.year, today.month, today.day);
-    final todayEnd = todayStart.add(const Duration(days: 1));
+    final todayDistanceAsync = ref.watch(todayRunDistanceProvider);
+    final todayStrengthCountAsync = ref.watch(todayStrengthCountProvider);
 
     return Card(
       child: Padding(
@@ -202,22 +201,62 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatItem(
-                  context,
-                  icon: Icons.directions_run,
-                  label: '跑步',
-                  value: '0 km',
+            todayDistanceAsync.when(
+              data: (distance) => todayStrengthCountAsync.when(
+                data: (strengthCount) => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildStatItem(
+                      context,
+                      icon: Icons.directions_run,
+                      label: '跑步',
+                      value: '${distance.toStringAsFixed(1)} km',
+                    ),
+                    _buildStatItem(
+                      context,
+                      icon: Icons.fitness_center,
+                      label: '力量',
+                      value: '$strengthCount 次',
+                    ),
+                  ],
                 ),
-                _buildStatItem(
-                  context,
-                  icon: Icons.fitness_center,
-                  label: '力量',
-                  value: '0 次',
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildStatItem(
+                      context,
+                      icon: Icons.directions_run,
+                      label: '跑步',
+                      value: '${distance.toStringAsFixed(1)} km',
+                    ),
+                    _buildStatItem(
+                      context,
+                      icon: Icons.fitness_center,
+                      label: '力量',
+                      value: '0 次',
+                    ),
+                  ],
                 ),
-              ],
+              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, __) => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStatItem(
+                    context,
+                    icon: Icons.directions_run,
+                    label: '跑步',
+                    value: '0 km',
+                  ),
+                  _buildStatItem(
+                    context,
+                    icon: Icons.fitness_center,
+                    label: '力量',
+                    value: '0 次',
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -259,6 +298,13 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildWeeklyOverview(BuildContext context, WidgetRef ref) {
+    final today = DateTime.now();
+    final weekStart = today.subtract(Duration(days: today.weekday - 1));
+    final weekStartDate = DateTime(weekStart.year, weekStart.month, weekStart.day);
+    
+    final weekDistanceAsync = ref.watch(weekTotalDistanceProvider(weekStartDate));
+    final weekTrainingDaysAsync = ref.watch(weekTrainingDaysProvider(weekStartDate));
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -282,22 +328,62 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatItem(
-                  context,
-                  icon: Icons.directions_run,
-                  label: '周跑量',
-                  value: '0 km',
+            weekDistanceAsync.when(
+              data: (distance) => weekTrainingDaysAsync.when(
+                data: (trainingDays) => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildStatItem(
+                      context,
+                      icon: Icons.directions_run,
+                      label: '周跑量',
+                      value: '${distance.toStringAsFixed(1)} km',
+                    ),
+                    _buildStatItem(
+                      context,
+                      icon: Icons.emoji_events,
+                      label: '训练天数',
+                      value: '$trainingDays 天',
+                    ),
+                  ],
                 ),
-                _buildStatItem(
-                  context,
-                  icon: Icons.emoji_events,
-                  label: '训练天数',
-                  value: '0 天',
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildStatItem(
+                      context,
+                      icon: Icons.directions_run,
+                      label: '周跑量',
+                      value: '${distance.toStringAsFixed(1)} km',
+                    ),
+                    _buildStatItem(
+                      context,
+                      icon: Icons.emoji_events,
+                      label: '训练天数',
+                      value: '0 天',
+                    ),
+                  ],
                 ),
-              ],
+              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, __) => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStatItem(
+                    context,
+                    icon: Icons.directions_run,
+                    label: '周跑量',
+                    value: '0 km',
+                  ),
+                  _buildStatItem(
+                    context,
+                    icon: Icons.emoji_events,
+                    label: '训练天数',
+                    value: '0 天',
+                  ),
+                ],
+              ),
             ),
           ],
         ),
