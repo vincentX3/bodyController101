@@ -133,46 +133,59 @@ class RunRecordsTab extends ConsumerWidget {
   Widget _buildRunRecordCard(BuildContext context, WidgetRef ref, dynamic record) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          child: Icon(
-            Icons.directions_run,
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
-          ),
-        ),
-        title: Text(
-          '${record.distance.toStringAsFixed(1)} km',
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
           children: [
-            Text('用时：${record.durationMinutes}分${record.durationSeconds}秒'),
-            Text('配速：${record.pace}'),
-            Text('体感：${_getPerceivedExertionEmoji(record.perceivedExertion)}'),
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              DateFormat('MM-dd').format(record.date),
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
+            // 左侧图标
+            CircleAvatar(
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              child: Icon(
+                Icons.directions_run,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => _confirmDeleteRun(context, ref, record.id),
+            const SizedBox(width: 12),
+            // 中间内容
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${record.distance.toStringAsFixed(1)} km',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 4),
+                  Text('用时：${record.durationMinutes}分${record.durationSeconds}秒'),
+                  Text('配速：${record.pace}'),
+                  Text('体感：${_getPerceivedExertionEmoji(record.perceivedExertion)}'),
+                ],
+              ),
+            ),
+            // 右侧日期和删除按钮
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  DateFormat('MM-dd').format(record.date),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                GestureDetector(
+                  onTap: () => _confirmDeleteRun(context, ref, record.id),
+                  child: Icon(
+                    Icons.delete_outline,
+                    color: Colors.grey[600],
+                    size: 22,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        onTap: () {
-          // 可以添加查看详情功能
-        },
       ),
     );
   }
@@ -279,45 +292,58 @@ class StrengthRecordsTab extends ConsumerWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: splitColor,
-          child: Icon(
-            Icons.fitness_center,
-            color: Colors.white,
-          ),
-        ),
-        title: Text(
-          record.splitType,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
           children: [
-            Text('容量：${record.totalVolume.toStringAsFixed(0)} kg'),
-            Text('时长：${record.durationMinutes} 分钟'),
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              DateFormat('MM-dd').format(record.date),
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
+            // 左侧图标
+            CircleAvatar(
+              backgroundColor: splitColor,
+              child: const Icon(
+                Icons.fitness_center,
+                color: Colors.white,
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => _confirmDeleteStrength(context, ref, record.id),
+            const SizedBox(width: 12),
+            // 中间内容
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    record.splitType,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 4),
+                  Text('容量：${record.totalVolume.toStringAsFixed(0)} kg'),
+                  Text('时长：${record.durationMinutes} 分钟'),
+                ],
+              ),
+            ),
+            // 右侧日期和删除按钮
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  DateFormat('MM-dd').format(record.date),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                GestureDetector(
+                  onTap: () => _confirmDeleteStrength(context, ref, record.id),
+                  child: Icon(
+                    Icons.delete_outline,
+                    color: Colors.grey[600],
+                    size: 22,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        onTap: () {
-          // 可以添加查看详情功能
-        },
       ),
     );
   }

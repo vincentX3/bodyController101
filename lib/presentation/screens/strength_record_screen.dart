@@ -361,128 +361,151 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
   Widget _buildSetRow(String exerciseName, int setIndex, Map<String, dynamic> setData) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
+      child: Column(
         children: [
-          // 组数
-          Container(
-            width: 40,
-            alignment: Alignment.center,
-            child: Text(
-              '第${setIndex + 1}组',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          const SizedBox(width: 8),
-          // 重量选择器
-          Expanded(
-            child: InkWell(
-              onTap: () async {
-                final weight = await _showWeightPicker(context, setData['weight'] ?? 0.0);
-                if (weight != null) {
-                  setState(() {
-                    _exerciseData[exerciseName]![setIndex]['weight'] = weight;
-                  });
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      setData['weight'] == 0.0 ? '选择重量' : '${setData['weight'].toStringAsFixed(1)} kg',
-                      style: TextStyle(
-                        color: setData['weight'] == 0.0 ? Colors.grey : null,
-                      ),
-                    ),
-                    const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                  ],
+          // 第一行：组数 + 重量 + 次数
+          Row(
+            children: [
+              // 组数
+              SizedBox(
+                width: 50,
+                child: Text(
+                  '第${setIndex + 1}组',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          // 次数选择器
-          Expanded(
-            child: InkWell(
-              onTap: () async {
-                final reps = await _showRepsPicker(context, setData['reps'] ?? 0);
-                if (reps != null) {
-                  setState(() {
-                    _exerciseData[exerciseName]![setIndex]['reps'] = reps;
-                  });
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      setData['reps'] == 0 ? '选择次数' : '${setData['reps']} 次',
-                      style: TextStyle(
-                        color: setData['reps'] == 0 ? Colors.grey : null,
-                      ),
+              const SizedBox(width: 8),
+              // 重量选择器
+              Expanded(
+                child: InkWell(
+                  onTap: () async {
+                    final weight = await _showWeightPicker(context, setData['weight'] ?? 0.0);
+                    if (weight != null) {
+                      setState(() {
+                        _exerciseData[exerciseName]![setIndex]['weight'] = weight;
+                      });
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                    const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                  ],
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            setData['weight'] == 0.0 ? '重量' : '${setData['weight'].toStringAsFixed(1)}kg',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: setData['weight'] == 0.0 ? Colors.grey : null,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const Icon(Icons.arrow_drop_down, color: Colors.grey, size: 18),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          // RPE选择器
-          SizedBox(
-            width: 70,
-            child: InkWell(
-              onTap: () async {
-                final rpe = await _showRpePicker(context, setData['rpe']);
-                if (rpe != null) {
-                  setState(() {
-                    _exerciseData[exerciseName]![setIndex]['rpe'] = rpe;
-                  });
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      setData['rpe'] == null ? 'RPE' : 'RPE ${setData['rpe']}',
-                      style: TextStyle(
-                        color: setData['rpe'] == null ? Colors.grey : null,
-                      ),
+              const SizedBox(width: 8),
+              // 次数选择器
+              Expanded(
+                child: InkWell(
+                  onTap: () async {
+                    final reps = await _showRepsPicker(context, setData['reps'] ?? 0);
+                    if (reps != null) {
+                      setState(() {
+                        _exerciseData[exerciseName]![setIndex]['reps'] = reps;
+                      });
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                    const Icon(Icons.arrow_drop_down, color: Colors.grey, size: 16),
-                  ],
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            setData['reps'] == 0 ? '次数' : '${setData['reps']}次',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: setData['reps'] == 0 ? Colors.grey : null,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const Icon(Icons.arrow_drop_down, color: Colors.grey, size: 18),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-          const SizedBox(width: 4),
-          // 删除按钮
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.red),
-            onPressed: () {
-              setState(() {
-                _exerciseData[exerciseName]!.removeAt(setIndex);
-              });
-            },
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-            padding: EdgeInsets.zero,
+          const SizedBox(height: 6),
+          // 第二行：RPE + 删除按钮
+          Row(
+            children: [
+              const SizedBox(width: 58), // 对齐第一行
+              // RPE选择器
+              Expanded(
+                child: InkWell(
+                  onTap: () async {
+                    final rpe = await _showRpePicker(context, setData['rpe']);
+                    if (rpe != null) {
+                      setState(() {
+                        _exerciseData[exerciseName]![setIndex]['rpe'] = rpe;
+                      });
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          setData['rpe'] == null ? 'RPE' : 'RPE ${setData['rpe']}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: setData['rpe'] == null ? Colors.grey : null,
+                          ),
+                        ),
+                        const Icon(Icons.arrow_drop_down, color: Colors.grey, size: 18),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // 删除按钮
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _exerciseData[exerciseName]!.removeAt(setIndex);
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.red.withOpacity(0.3)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                ),
+              ),
+            ],
           ),
         ],
       ),
