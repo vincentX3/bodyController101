@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../main.dart';
 import '../../data/providers/providers.dart';
 import '../../data/repositories/run_repository.dart';
 
@@ -130,11 +131,16 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
             children: [
               // 日期选择
               Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.grey.shade200),
+                ),
                 child: ListTile(
-                  leading: const Icon(Icons.calendar_today),
-                  title: const Text('训练日期'),
+                  leading: Icon(Icons.calendar_today, color: MyApp.primaryColor),
+                  title: const Text('训练日期', style: TextStyle(color: MyApp.textPrimary)),
                   subtitle: Text(DateFormat('yyyy-MM-dd').format(_selectedDate)),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: MyApp.textHint),
                   onTap: _selectDate,
                 ),
               ),
@@ -142,6 +148,11 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
 
               // 距离输入
               Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.grey.shade200),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -149,16 +160,21 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
                     children: [
                       const Text(
                         '距离 (km)',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: MyApp.textPrimary),
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _distanceController,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: '输入距离',
                           suffixText: 'km',
-                          border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: const Color(0xFFF5F5F5),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide.none,
+                          ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -179,6 +195,8 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
                         children: _quickDistances.map((dist) {
                           return ActionChip(
                             label: Text('${dist.toStringAsFixed(1)}km'),
+                            backgroundColor: MyApp.primaryColor.withOpacity(0.1),
+                            labelStyle: TextStyle(color: MyApp.primaryColor, fontWeight: FontWeight.w500),
                             onPressed: () {
                               _distanceController.text = dist.toStringAsFixed(1);
                               _calculatePace();
@@ -194,6 +212,11 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
 
               // 时间输入
               Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.grey.shade200),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -201,7 +224,7 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
                     children: [
                       const Text(
                         '用时',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: MyApp.textPrimary),
                       ),
                       const SizedBox(height: 12),
                       Row(
@@ -210,10 +233,15 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
                             child: TextFormField(
                               controller: _minutesController,
                               keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: '分钟',
                                 hintText: '0',
-                                border: OutlineInputBorder(),
+                                filled: true,
+                                fillColor: const Color(0xFFF5F5F5),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide.none,
+                                ),
                               ),
                               onChanged: (_) => _calculatePace(),
                               validator: (value) {
@@ -229,10 +257,15 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
                             child: TextFormField(
                               controller: _secondsController,
                               keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: '秒',
                                 hintText: '0',
-                                border: OutlineInputBorder(),
+                                filled: true,
+                                fillColor: const Color(0xFFF5F5F5),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide.none,
+                                ),
                               ),
                               onChanged: (_) => _calculatePace(),
                               validator: (value) {
@@ -254,14 +287,14 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondaryContainer,
+                          color: MyApp.primaryColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           children: [
                             Icon(
                               Icons.speed,
-                              color: Theme.of(context).colorScheme.onSecondaryContainer,
+                              color: MyApp.primaryColor,
                             ),
                             const SizedBox(width: 8),
                             Text(
@@ -269,7 +302,7 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                color: MyApp.primaryColor,
                               ),
                             ),
                           ],
@@ -283,6 +316,11 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
 
               // 体感评分
               Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.grey.shade200),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -290,7 +328,7 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
                     children: [
                       const Text(
                         '体感评分',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: MyApp.textPrimary),
                       ),
                       const SizedBox(height: 12),
                       Row(
@@ -302,7 +340,7 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
                                 iconSize: 40,
                                 icon: Icon(
                                   index < _perceivedExertion ? Icons.star : Icons.star_border,
-                                  color: index < _perceivedExertion ? Colors.amber : Colors.grey,
+                                  color: index < _perceivedExertion ? MyApp.legDayColor : Colors.grey.shade400,
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -312,7 +350,7 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
                               ),
                               Text(
                                 '${index + 1}',
-                                style: const TextStyle(fontSize: 12),
+                                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                               ),
                             ],
                           );
@@ -339,8 +377,13 @@ class _RunRecordScreenState extends ConsumerState<RunRecordScreen> {
                 icon: const Icon(Icons.save),
                 label: const Text('保存记录'),
                 style: FilledButton.styleFrom(
+                  backgroundColor: MyApp.primaryColor,
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(fontSize: 16),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
                 ),
               ),
             ],

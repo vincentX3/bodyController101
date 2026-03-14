@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../main.dart';
 import '../../data/providers/providers.dart';
 import '../../data/repositories/run_repository.dart';
 import '../../data/repositories/strength_repository.dart';
@@ -71,7 +72,8 @@ class _RecordsListScreenState extends ConsumerState<RecordsListScreen>
             }
           }
         },
-        child: const Icon(Icons.add),
+        backgroundColor: MyApp.primaryColor,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
@@ -91,15 +93,23 @@ class RunRecordsTab extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.directions_run_outlined,
-                  size: 80,
-                  color: Colors.grey[400],
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: MyApp.primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Icon(
+                    Icons.directions_run_outlined,
+                    size: 50,
+                    color: MyApp.primaryColor,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 const Text(
                   '还没有跑步记录',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                  style: TextStyle(fontSize: 18, color: MyApp.textPrimary, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -132,17 +142,27 @@ class RunRecordsTab extends ConsumerWidget {
 
   Widget _buildRunRecordCard(BuildContext context, WidgetRef ref, dynamic record) {
     return Card(
+      elevation: 0,
       margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
             // 左侧图标
-            CircleAvatar(
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: MyApp.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(24),
+              ),
               child: Icon(
                 Icons.directions_run,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                color: MyApp.primaryColor,
               ),
             ),
             const SizedBox(width: 12),
@@ -153,12 +173,12 @@ class RunRecordsTab extends ConsumerWidget {
                 children: [
                   Text(
                     '${record.distance.toStringAsFixed(1)} km',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: MyApp.textPrimary),
                   ),
                   const SizedBox(height: 4),
-                  Text('用时：${record.durationMinutes}分${record.durationSeconds}秒'),
-                  Text('配速：${record.pace}'),
-                  Text('体感：${_getPerceivedExertionEmoji(record.perceivedExertion)}'),
+                  Text('用时：${record.durationMinutes}分${record.durationSeconds}秒', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                  Text('配速：${record.pace}', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                  Text('体感：${_getPerceivedExertionEmoji(record.perceivedExertion)}', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
                 ],
               ),
             ),
@@ -176,10 +196,17 @@ class RunRecordsTab extends ConsumerWidget {
                 const SizedBox(height: 4),
                 GestureDetector(
                   onTap: () => _confirmDeleteRun(context, ref, record.id),
-                  child: Icon(
-                    Icons.delete_outline,
-                    color: Colors.grey[600],
-                    size: 22,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFEBEE),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Icon(
+                      Icons.delete_outline,
+                      color: Color(0xFFE53935),
+                      size: 18,
+                    ),
                   ),
                 ),
               ],
@@ -248,15 +275,23 @@ class StrengthRecordsTab extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.fitness_center_outlined,
-                  size: 80,
-                  color: Colors.grey[400],
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: MyApp.secondaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Icon(
+                    Icons.fitness_center_outlined,
+                    size: 50,
+                    color: MyApp.secondaryColor,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 const Text(
                   '还没有力量训练记录',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                  style: TextStyle(fontSize: 18, color: MyApp.textPrimary, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -291,17 +326,27 @@ class StrengthRecordsTab extends ConsumerWidget {
     final splitColor = _getSplitColor(record.splitType);
 
     return Card(
+      elevation: 0,
       margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
             // 左侧图标
-            CircleAvatar(
-              backgroundColor: splitColor,
-              child: const Icon(
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: splitColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Icon(
                 Icons.fitness_center,
-                color: Colors.white,
+                color: splitColor,
               ),
             ),
             const SizedBox(width: 12),
@@ -312,11 +357,11 @@ class StrengthRecordsTab extends ConsumerWidget {
                 children: [
                   Text(
                     record.splitType,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: splitColor),
                   ),
                   const SizedBox(height: 4),
-                  Text('容量：${record.totalVolume.toStringAsFixed(0)} kg'),
-                  Text('时长：${record.durationMinutes} 分钟'),
+                  Text('容量：${record.totalVolume.toStringAsFixed(0)} kg', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                  Text('时长：${record.durationMinutes} 分钟', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
                 ],
               ),
             ),
@@ -334,10 +379,17 @@ class StrengthRecordsTab extends ConsumerWidget {
                 const SizedBox(height: 4),
                 GestureDetector(
                   onTap: () => _confirmDeleteStrength(context, ref, record.id),
-                  child: Icon(
-                    Icons.delete_outline,
-                    color: Colors.grey[600],
-                    size: 22,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFEBEE),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Icon(
+                      Icons.delete_outline,
+                      color: Color(0xFFE53935),
+                      size: 18,
+                    ),
                   ),
                 ),
               ],
@@ -351,11 +403,11 @@ class StrengthRecordsTab extends ConsumerWidget {
   Color _getSplitColor(String splitType) {
     switch (splitType) {
       case '推日':
-        return Colors.blue;
+        return MyApp.pushDayColor;
       case '拉日':
-        return Colors.green;
+        return MyApp.pullDayColor;
       case '腿日':
-        return Colors.orange;
+        return MyApp.legDayColor;
       default:
         return Colors.grey;
     }

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../main.dart';
 import '../../data/providers/providers.dart';
 import '../../data/repositories/strength_repository.dart';
 
@@ -244,11 +245,16 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
           children: [
             // 日期选择
             Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.grey.shade200),
+              ),
               child: ListTile(
-                leading: const Icon(Icons.calendar_today),
-                title: const Text('训练日期'),
+                leading: Icon(Icons.calendar_today, color: MyApp.primaryColor),
+                title: const Text('训练日期', style: TextStyle(color: MyApp.textPrimary)),
                 subtitle: Text(DateFormat('yyyy-MM-dd').format(_selectedDate)),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: MyApp.textHint),
                 onTap: _selectDate,
               ),
             ),
@@ -256,6 +262,11 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
 
             // 分化选择
             Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.grey.shade200),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -263,14 +274,23 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
                   children: [
                     const Text(
                       '选择分化',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: MyApp.textPrimary),
                     ),
                     const SizedBox(height: 12),
                     ..._splitTemplates.keys.map((split) {
+                      Color splitColor;
+                      if (split == '推日') {
+                        splitColor = MyApp.pushDayColor;
+                      } else if (split == '拉日') {
+                        splitColor = MyApp.pullDayColor;
+                      } else {
+                        splitColor = MyApp.legDayColor;
+                      }
                       return RadioListTile<String>(
-                        title: Text(split),
+                        title: Text(split, style: TextStyle(color: splitColor, fontWeight: FontWeight.w500)),
                         value: split,
                         groupValue: _selectedSplit,
+                        activeColor: splitColor,
                         onChanged: (value) {
                           setState(() {
                             _selectedSplit = value;
@@ -289,6 +309,11 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
             // 动作选择
             if (_selectedSplit != null) ...[
               Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.grey.shade200),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -296,13 +321,14 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
                     children: [
                       Text(
                         '选择今日动作（$_selectedSplit）',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: MyApp.textPrimary),
                       ),
                       const SizedBox(height: 12),
                       ..._splitTemplates[_selectedSplit]!.map((exercise) {
                         return CheckboxListTile(
                           title: Text(exercise),
                           value: _selectedExercises[exercise] ?? false,
+                          activeColor: MyApp.primaryColor,
                           onChanged: (value) {
                             setState(() {
                               _selectedExercises[exercise] = value ?? false;
@@ -340,8 +366,13 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
                 icon: const Icon(Icons.save),
                 label: const Text('保存记录'),
                 style: FilledButton.styleFrom(
+                  backgroundColor: MyApp.primaryColor,
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(fontSize: 16),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
                 ),
               ),
             ],
@@ -355,6 +386,11 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
     final sets = _exerciseData[exerciseName] ?? [];
 
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -362,7 +398,7 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
           children: [
             Text(
               exerciseName,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: MyApp.textPrimary),
             ),
             const SizedBox(height: 12),
             ...sets.asMap().entries.map((entry) {
@@ -390,8 +426,15 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
                   });
                 });
               },
-              icon: const Icon(Icons.add),
+              icon: const Icon(Icons.add, size: 18),
               label: const Text('添加一组'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: MyApp.primaryColor,
+                side: BorderSide(color: MyApp.primaryColor.withOpacity(0.3)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
             ),
           ],
         ),
@@ -412,7 +455,7 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
                 width: 50,
                 child: Text(
                   '第${setIndex + 1}组',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: MyApp.textSecondary),
                 ),
               ),
               const SizedBox(width: 8),
@@ -430,8 +473,8 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(4),
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -441,12 +484,12 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
                             setData['weight'] == 0.0 ? '重量' : '${setData['weight'].toStringAsFixed(1)}kg',
                             style: TextStyle(
                               fontSize: 13,
-                              color: setData['weight'] == 0.0 ? Colors.grey : null,
+                              color: setData['weight'] == 0.0 ? MyApp.textHint : MyApp.textPrimary,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const Icon(Icons.arrow_drop_down, color: Colors.grey, size: 18),
+                        Icon(Icons.arrow_drop_down, color: Colors.grey.shade500, size: 18),
                       ],
                     ),
                   ),
@@ -467,8 +510,8 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(4),
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -478,12 +521,12 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
                             setData['reps'] == 0 ? '次数' : '${setData['reps']}次',
                             style: TextStyle(
                               fontSize: 13,
-                              color: setData['reps'] == 0 ? Colors.grey : null,
+                              color: setData['reps'] == 0 ? MyApp.textHint : MyApp.textPrimary,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const Icon(Icons.arrow_drop_down, color: Colors.grey, size: 18),
+                        Icon(Icons.arrow_drop_down, color: Colors.grey.shade500, size: 18),
                       ],
                     ),
                   ),
@@ -510,8 +553,8 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(4),
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -520,10 +563,10 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
                           setData['rpe'] == null ? 'RPE' : 'RPE ${setData['rpe']}',
                           style: TextStyle(
                             fontSize: 13,
-                            color: setData['rpe'] == null ? Colors.grey : null,
+                            color: setData['rpe'] == null ? MyApp.textHint : MyApp.textPrimary,
                           ),
                         ),
-                        const Icon(Icons.arrow_drop_down, color: Colors.grey, size: 18),
+                        Icon(Icons.arrow_drop_down, color: Colors.grey.shade500, size: 18),
                       ],
                     ),
                   ),
@@ -540,10 +583,10 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.red.withOpacity(0.3)),
-                    borderRadius: BorderRadius.circular(4),
+                    color: const Color(0xFFFFEBEE),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                  child: const Icon(Icons.delete_outline, color: Color(0xFFE53935), size: 20),
                 ),
               ),
             ],

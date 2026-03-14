@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../main.dart';
 import '../../data/providers/providers.dart';
 import '../../data/repositories/run_repository.dart';
 import '../../data/repositories/strength_repository.dart';
@@ -35,21 +36,29 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.flag_outlined,
-                    size: 80,
-                    color: Colors.grey[400],
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: MyApp.legDayColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Icon(
+                      Icons.flag_outlined,
+                      size: 50,
+                      color: MyApp.legDayColor,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   const Text(
                     '还没有设定目标',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                    style: TextStyle(fontSize: 18, color: MyApp.textPrimary, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
                   TextButton.icon(
                     onPressed: () => _showAddGoalDialog(),
-                    icon: const Icon(Icons.add),
-                    label: const Text('添加目标'),
+                    icon: Icon(Icons.add, color: MyApp.primaryColor),
+                    label: Text('添加目标', style: TextStyle(color: MyApp.primaryColor)),
                   ),
                 ],
               ),
@@ -78,7 +87,12 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
     final isStrengthGoal = ['squat', 'bench_press', 'deadlift'].contains(goal.goalType);
 
     return Card(
+      elevation: 0,
       margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -90,17 +104,27 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
                 Expanded(
                   child: Row(
                     children: [
-                      Icon(
-                        isHalfMarathon ? Icons.directions_run : Icons.fitness_center,
-                        color: Theme.of(context).colorScheme.primary,
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: MyApp.primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Icon(
+                          isHalfMarathon ? Icons.directions_run : Icons.fitness_center,
+                          color: MyApp.primaryColor,
+                          size: 20,
+                        ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           goal.title,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: MyApp.textPrimary,
                           ),
                         ),
                       ),
@@ -108,14 +132,17 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
                   ),
                 ),
                 if (goal.isCompleted)
-                  const Chip(
-                    label: Text('已完成'),
-                    backgroundColor: Colors.green,
-                    labelStyle: TextStyle(color: Colors.white),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4CAF50),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text('已完成', style: TextStyle(color: Colors.white, fontSize: 12)),
                   )
                 else
                   IconButton(
-                    icon: const Icon(Icons.delete_outline),
+                    icon: const Icon(Icons.delete_outline, color: Color(0xFFE53935)),
                     onPressed: () => _confirmDeleteGoal(goal.id),
                   ),
               ],
@@ -154,11 +181,11 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
         if (targetDate != null) ...[
           Row(
             children: [
-              const Icon(Icons.event, size: 20),
+              Icon(Icons.event, size: 20, color: Colors.grey[600]),
               const SizedBox(width: 8),
               Text(
                 '目标日期：${DateFormat('yyyy-MM-dd').format(targetDate)}',
-                style: const TextStyle(fontSize: 14),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -167,8 +194,8 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: daysRemaining > 0
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : Colors.red.withOpacity(0.1),
+                  ? MyApp.primaryColor.withOpacity(0.1)
+                  : const Color(0xFFFFEBEE),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -177,8 +204,8 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: daysRemaining > 0
-                    ? Theme.of(context).colorScheme.onPrimaryContainer
-                    : Colors.red,
+                    ? MyApp.primaryColor
+                    : const Color(0xFFE53935),
               ),
             ),
           ),
@@ -187,11 +214,11 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
           const SizedBox(height: 12),
           Row(
             children: [
-              const Icon(Icons.timer, size: 20),
+              Icon(Icons.timer, size: 20, color: Colors.grey[600]),
               const SizedBox(width: 8),
               Text(
                 '目标完赛时间：$targetTime',
-                style: const TextStyle(fontSize: 14),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -220,11 +247,11 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
         if (targetWeight != null) ...[
           Row(
             children: [
-              const Icon(Icons.flag, size: 20),
+              Icon(Icons.flag, size: 20, color: Colors.grey[600]),
               const SizedBox(width: 8),
               Text(
                 '目标重量：$targetWeight',
-                style: const TextStyle(fontSize: 14),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -232,24 +259,26 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
           if (currentWeight != null) ...[
             Row(
               children: [
-                const Icon(Icons.trending_up, size: 20),
+                Icon(Icons.trending_up, size: 20, color: Colors.grey[600]),
                 const SizedBox(width: 8),
                 Text(
                   '当前最佳：$currentWeight',
-                  style: const TextStyle(fontSize: 14),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             LinearProgressIndicator(
               value: progress,
-              backgroundColor: Colors.grey[300],
+              backgroundColor: Colors.grey.shade200,
+              valueColor: AlwaysStoppedAnimation<Color>(MyApp.primaryColor),
               minHeight: 8,
+              borderRadius: BorderRadius.circular(4),
             ),
             const SizedBox(height: 4),
             Text(
               '${(progress * 100).toStringAsFixed(0)}%',
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
           ],
         ],
@@ -342,6 +371,10 @@ class _AddGoalDialogState extends ConsumerState<AddGoalDialog> {
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -350,16 +383,21 @@ class _AddGoalDialogState extends ConsumerState<AddGoalDialog> {
           children: [
             const Text(
               '添加目标',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: MyApp.textPrimary),
             ),
             const SizedBox(height: 24),
 
             // 目标类型选择
             DropdownButtonFormField<String>(
               value: _goalType,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: '目标类型',
-                border: OutlineInputBorder(),
+                filled: true,
+                fillColor: const Color(0xFFF5F5F5),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
               ),
               items: _goalTypes.entries.map((entry) {
                 return DropdownMenuItem(
@@ -382,9 +420,14 @@ class _AddGoalDialogState extends ConsumerState<AddGoalDialog> {
             // 标题
             TextFormField(
               controller: _titleController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: '目标标题',
-                border: OutlineInputBorder(),
+                filled: true,
+                fillColor: const Color(0xFFF5F5F5),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -395,9 +438,14 @@ class _AddGoalDialogState extends ConsumerState<AddGoalDialog> {
               InkWell(
                 onTap: _selectDate,
                 child: InputDecorator(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: '目标日期',
-                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: const Color(0xFFF5F5F5),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
                   child: Text(
                     _targetDate != null
@@ -411,10 +459,15 @@ class _AddGoalDialogState extends ConsumerState<AddGoalDialog> {
               // 目标完赛时间
               TextFormField(
                 controller: _targetValueController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: '目标完赛时间（如 1:30:00）',
-                  border: OutlineInputBorder(),
                   hintText: 'HH:MM:SS',
+                  filled: true,
+                  fillColor: const Color(0xFFF5F5F5),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
             ],
@@ -425,10 +478,15 @@ class _AddGoalDialogState extends ConsumerState<AddGoalDialog> {
               TextFormField(
                 controller: _targetValueController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: '目标重量（kg）',
-                  border: OutlineInputBorder(),
                   suffixText: 'kg',
+                  filled: true,
+                  fillColor: const Color(0xFFF5F5F5),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -437,10 +495,15 @@ class _AddGoalDialogState extends ConsumerState<AddGoalDialog> {
               TextFormField(
                 controller: _currentValueController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: '当前最佳重量（可选）',
-                  border: OutlineInputBorder(),
                   suffixText: 'kg',
+                  filled: true,
+                  fillColor: const Color(0xFFF5F5F5),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
             ],
@@ -449,7 +512,15 @@ class _AddGoalDialogState extends ConsumerState<AddGoalDialog> {
 
             FilledButton(
               onPressed: _saveGoal,
-              child: const Text('保存'),
+              style: FilledButton.styleFrom(
+                backgroundColor: MyApp.primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+              child: const Text('保存', style: TextStyle(fontWeight: FontWeight.w600)),
             ),
           ],
         ),

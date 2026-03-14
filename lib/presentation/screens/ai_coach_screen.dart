@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../main.dart';
 import '../../data/providers/providers.dart';
 import '../../data/services/ai_service.dart';
 
@@ -60,15 +61,23 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.psychology_outlined,
-              size: 100,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: MyApp.legDayColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(60),
+              ),
+              child: Icon(
+                Icons.psychology_outlined,
+                size: 60,
+                color: MyApp.legDayColor,
+              ),
             ),
             const SizedBox(height: 24),
             const Text(
               '设置AI教练',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: MyApp.textPrimary),
             ),
             const SizedBox(height: 16),
             Text(
@@ -93,7 +102,12 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
               icon: const Icon(Icons.settings),
               label: const Text('配置API Key'),
               style: FilledButton.styleFrom(
+                backgroundColor: MyApp.primaryColor,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
               ),
             ),
           ],
@@ -109,7 +123,7 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            color: Colors.white,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -123,16 +137,28 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _isLoading ? null : _generateInsights,
-                  icon: const Icon(Icons.insights),
-                  label: const Text('数据洞察'),
+                  icon: Icon(Icons.insights, color: MyApp.primaryColor),
+                  label: Text('数据洞察', style: TextStyle(color: MyApp.primaryColor)),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: MyApp.primaryColor.withOpacity(0.3)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton.icon(
                   onPressed: _isLoading ? null : _generatePlan,
-                  icon: const Icon(Icons.calendar_today),
-                  label: const Text('生成计划'),
+                  icon: const Icon(Icons.calendar_today, color: Colors.white),
+                  label: const Text('生成计划', style: TextStyle(color: Colors.white)),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: MyApp.primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -146,10 +172,18 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.chat_bubble_outline,
-                        size: 80,
-                        color: Colors.grey[400],
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: MyApp.legDayColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: Icon(
+                          Icons.chat_bubble_outline,
+                          size: 50,
+                          color: MyApp.legDayColor,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -157,6 +191,7 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -215,7 +250,7 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            color: Colors.white,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -233,7 +268,12 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
                     hintText: _questionCount >= _maxQuestions
                         ? '追问次数已用完，请重新生成'
                         : '输入问题或调整建议...',
-                    border: const OutlineInputBorder(),
+                    filled: true,
+                    fillColor: const Color(0xFFF5F5F5),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      borderSide: BorderSide.none,
+                    ),
                     enabled: _questionCount < _maxQuestions && !_isLoading,
                   ),
                   maxLines: null,
@@ -246,11 +286,19 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              IconButton.filled(
-                onPressed: _questionCount < _maxQuestions && !_isLoading
-                    ? _sendMessage
-                    : null,
-                icon: const Icon(Icons.send),
+              Container(
+                decoration: BoxDecoration(
+                  color: _questionCount < _maxQuestions && !_isLoading
+                      ? MyApp.primaryColor
+                      : Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: IconButton(
+                  onPressed: _questionCount < _maxQuestions && !_isLoading
+                      ? _sendMessage
+                      : null,
+                  icon: const Icon(Icons.send, color: Colors.white),
+                ),
               ),
             ],
           ),
@@ -267,10 +315,14 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser) ...[
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              child: const Icon(Icons.psychology, color: Colors.white, size: 20),
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: MyApp.legDayColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(Icons.psychology, color: MyApp.legDayColor, size: 20),
             ),
             const SizedBox(width: 8),
           ],
@@ -279,16 +331,14 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: isUser
-                    ? Theme.of(context).colorScheme.primaryContainer
-                    : Theme.of(context).colorScheme.surfaceVariant,
+                    ? MyApp.primaryColor.withOpacity(0.1)
+                    : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: SelectableText(
                 message,
                 style: TextStyle(
-                  color: isUser
-                      ? Theme.of(context).colorScheme.onPrimaryContainer
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: isUser ? MyApp.primaryColor : MyApp.textPrimary,
                   height: 1.5,
                 ),
               ),
@@ -296,10 +346,14 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
           ),
           if (isUser) ...[
             const SizedBox(width: 8),
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: Theme.of(context).colorScheme.secondary,
-              child: const Icon(Icons.person, color: Colors.white, size: 20),
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: MyApp.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(Icons.person, color: MyApp.primaryColor, size: 20),
             ),
           ],
         ],
@@ -432,28 +486,41 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('AI配置'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text('AI配置', style: TextStyle(color: MyApp.textPrimary)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('阿里云百炼API Key'),
+              const Text('阿里云百炼API Key', style: TextStyle(color: MyApp.textSecondary)),
               const SizedBox(height: 8),
               TextField(
                 controller: apiKeyController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'sk-xxxxxxxxxxxxxxxxxxxxxxxx',
-                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: const Color(0xFFF5F5F5),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
                 obscureText: true,
               ),
               const SizedBox(height: 16),
-              const Text('模型选择'),
+              const Text('模型选择', style: TextStyle(color: MyApp.textSecondary)),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 value: tempModel,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color(0xFFF5F5F5),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
                 items: _modelOptions.map((opt) {
                   return DropdownMenuItem(
@@ -470,14 +537,14 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
               const SizedBox(height: 12),
               Text(
                 '获取API Key：dashscope.console.aliyun.com',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
               ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('取消'),
+              child: const Text('取消', style: TextStyle(color: MyApp.textSecondary)),
             ),
             FilledButton(
               onPressed: () async {
@@ -508,7 +575,13 @@ class _AICoachScreenState extends ConsumerState<AICoachScreen> {
                   }
                 }
               },
-              child: const Text('保存'),
+              style: FilledButton.styleFrom(
+                backgroundColor: MyApp.primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('保存', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

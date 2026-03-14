@@ -16,6 +16,18 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  // 定义配色常量
+  static const Color primaryColor = Color(0xFFE85A4F); // 珊瑚红
+  static const Color secondaryColor = Color(0xFF4ECDC4); // 青绿色
+  static const Color pushDayColor = Color(0xFFE85A4F); // 推日 - 珊瑚红
+  static const Color pullDayColor = Color(0xFF4ECDC4); // 拉日 - 青绿色
+  static const Color legDayColor = Color(0xFFF7B731); // 腿日 - 金黄色
+  static const Color backgroundColor = Color(0xFFFAF9FA); // 极浅灰白背景
+  static const Color cardColor = Color(0xFFFFFFFF); // 纯白卡片
+  static const Color textPrimary = Color(0xFF1A1A1A); // 主标题
+  static const Color textSecondary = Color(0xFF666666); // 副文本
+  static const Color textHint = Color(0xFF9E9E9E); // 占位符
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -23,11 +35,36 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
+          seedColor: primaryColor,
+          brightness: Brightness.light,
+          primary: primaryColor,
+          secondary: secondaryColor,
+          surface: cardColor,
         ),
         useMaterial3: true,
         fontFamily: 'Roboto',
+        scaffoldBackgroundColor: backgroundColor,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: cardColor,
+          foregroundColor: textPrimary,
+          elevation: 0,
+          centerTitle: true,
+        ),
+        cardTheme: const CardThemeData(
+          color: cardColor,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+          ),
+        ),
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: cardColor,
+          indicatorColor: primaryColor.withOpacity(0.1),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
+        ),
       ),
       home: const MainScreen(),
     );
@@ -132,17 +169,26 @@ class HomeScreen extends ConsumerWidget {
     }
 
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: MyApp.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(30),
+              ),
               child: Icon(
                 Icons.fitness_center,
                 size: 30,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                color: MyApp.primaryColor,
               ),
             ),
             const SizedBox(width: 16),
@@ -155,6 +201,7 @@ class HomeScreen extends ConsumerWidget {
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: MyApp.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -162,7 +209,7 @@ class HomeScreen extends ConsumerWidget {
                     '准备好今天的训练了吗？',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[400],
+                      color: Colors.grey[600],
                     ),
                   ),
                 ],
@@ -179,6 +226,11 @@ class HomeScreen extends ConsumerWidget {
     final todayStrengthCountAsync = ref.watch(todayStrengthCountProvider);
 
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -188,7 +240,7 @@ class HomeScreen extends ConsumerWidget {
               children: [
                 Icon(
                   Icons.today,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: MyApp.primaryColor,
                 ),
                 const SizedBox(width: 8),
                 const Text(
@@ -196,6 +248,7 @@ class HomeScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: MyApp.textPrimary,
                   ),
                 ),
               ],
@@ -211,12 +264,14 @@ class HomeScreen extends ConsumerWidget {
                       icon: Icons.directions_run,
                       label: '跑步',
                       value: '${distance.toStringAsFixed(1)} km',
+                      color: MyApp.primaryColor,
                     ),
                     _buildStatItem(
                       context,
                       icon: Icons.fitness_center,
                       label: '力量',
                       value: '$strengthCount 次',
+                      color: MyApp.secondaryColor,
                     ),
                   ],
                 ),
@@ -229,12 +284,14 @@ class HomeScreen extends ConsumerWidget {
                       icon: Icons.directions_run,
                       label: '跑步',
                       value: '${distance.toStringAsFixed(1)} km',
+                      color: MyApp.primaryColor,
                     ),
                     _buildStatItem(
                       context,
                       icon: Icons.fitness_center,
                       label: '力量',
                       value: '0 次',
+                      color: MyApp.secondaryColor,
                     ),
                   ],
                 ),
@@ -248,12 +305,14 @@ class HomeScreen extends ConsumerWidget {
                     icon: Icons.directions_run,
                     label: '跑步',
                     value: '0 km',
+                    color: MyApp.primaryColor,
                   ),
                   _buildStatItem(
                     context,
                     icon: Icons.fitness_center,
                     label: '力量',
                     value: '0 次',
+                    color: MyApp.secondaryColor,
                   ),
                 ],
               ),
@@ -269,20 +328,29 @@ class HomeScreen extends ConsumerWidget {
     required IconData icon,
     required String label,
     required String value,
+    Color? color,
   }) {
     return Column(
       children: [
-        Icon(
-          icon,
-          size: 32,
-          color: Theme.of(context).colorScheme.primary,
+        Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            color: (color ?? MyApp.primaryColor).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Icon(
+            icon,
+            size: 28,
+            color: color ?? MyApp.primaryColor,
+          ),
         ),
         const SizedBox(height: 8),
         Text(
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey[400],
+            color: Colors.grey[600],
           ),
         ),
         const SizedBox(height: 4),
@@ -291,6 +359,7 @@ class HomeScreen extends ConsumerWidget {
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
+            color: MyApp.textPrimary,
           ),
         ),
       ],
@@ -306,6 +375,11 @@ class HomeScreen extends ConsumerWidget {
     final weekTrainingDaysAsync = ref.watch(weekTrainingDaysProvider(weekStartDate));
 
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -315,7 +389,7 @@ class HomeScreen extends ConsumerWidget {
               children: [
                 Icon(
                   Icons.calendar_view_week,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: MyApp.primaryColor,
                 ),
                 const SizedBox(width: 8),
                 const Text(
@@ -323,6 +397,7 @@ class HomeScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: MyApp.textPrimary,
                   ),
                 ),
               ],
@@ -338,12 +413,14 @@ class HomeScreen extends ConsumerWidget {
                       icon: Icons.directions_run,
                       label: '周跑量',
                       value: '${distance.toStringAsFixed(1)} km',
+                      color: MyApp.primaryColor,
                     ),
                     _buildStatItem(
                       context,
                       icon: Icons.emoji_events,
                       label: '训练天数',
                       value: '$trainingDays 天',
+                      color: MyApp.legDayColor,
                     ),
                   ],
                 ),
@@ -356,12 +433,14 @@ class HomeScreen extends ConsumerWidget {
                       icon: Icons.directions_run,
                       label: '周跑量',
                       value: '${distance.toStringAsFixed(1)} km',
+                      color: MyApp.primaryColor,
                     ),
                     _buildStatItem(
                       context,
                       icon: Icons.emoji_events,
                       label: '训练天数',
                       value: '0 天',
+                      color: MyApp.legDayColor,
                     ),
                   ],
                 ),
@@ -375,12 +454,14 @@ class HomeScreen extends ConsumerWidget {
                     icon: Icons.directions_run,
                     label: '周跑量',
                     value: '0 km',
+                    color: MyApp.primaryColor,
                   ),
                   _buildStatItem(
                     context,
                     icon: Icons.emoji_events,
                     label: '训练天数',
                     value: '0 天',
+                    color: MyApp.legDayColor,
                   ),
                 ],
               ),
@@ -400,6 +481,7 @@ class HomeScreen extends ConsumerWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
+            color: MyApp.textPrimary,
           ),
         ),
         const SizedBox(height: 12),
@@ -410,7 +492,7 @@ class HomeScreen extends ConsumerWidget {
                 context,
                 icon: Icons.directions_run,
                 label: '记录跑步',
-                color: Colors.blue,
+                color: MyApp.primaryColor,
                 onTap: () {
                   ref.read(currentPageIndexProvider.notifier).state = 1;
                 },
@@ -422,7 +504,7 @@ class HomeScreen extends ConsumerWidget {
                 context,
                 icon: Icons.fitness_center,
                 label: '记录力量',
-                color: Colors.green,
+                color: MyApp.secondaryColor,
                 onTap: () {
                   ref.read(currentPageIndexProvider.notifier).state = 1;
                 },
@@ -435,7 +517,7 @@ class HomeScreen extends ConsumerWidget {
           context,
           icon: Icons.psychology,
           label: 'AI教练分析',
-          color: Colors.purple,
+          color: MyApp.legDayColor,
           isFullWidth: true,
           onTap: () {
             ref.read(currentPageIndexProvider.notifier).state = 3;
@@ -459,20 +541,20 @@ class HomeScreen extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withOpacity(0.08),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withOpacity(0.2)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color),
+            Icon(icon, color: color, size: 20),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
                 color: color,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
