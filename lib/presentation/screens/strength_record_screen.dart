@@ -374,10 +374,15 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
             OutlinedButton.icon(
               onPressed: () {
                 setState(() {
-                  // 引体向上使用上次输入的体重作为默认值
-                  final defaultWeight = (exerciseName == '引体向上' && _lastPullUpBodyweight != null)
-                      ? _lastPullUpBodyweight!
-                      : 0.0;
+                  // 默认填充上一组的重量
+                  double defaultWeight = 0.0;
+                  if (sets.isNotEmpty && sets.last['weight'] > 0) {
+                    // 使用上一组的重量
+                    defaultWeight = sets.last['weight'];
+                  } else if (exerciseName == '引体向上' && _lastPullUpBodyweight != null) {
+                    // 引体向上且没有上一组数据时，使用上次记录的体重
+                    defaultWeight = _lastPullUpBodyweight!;
+                  }
                   _exerciseData[exerciseName]!.add({
                     'weight': defaultWeight,
                     'reps': 0,
