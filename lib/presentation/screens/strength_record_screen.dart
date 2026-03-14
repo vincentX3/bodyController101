@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/providers/providers.dart';
 import '../../data/repositories/strength_repository.dart';
 
@@ -16,6 +17,10 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
   String? _selectedSplit;
   DateTime _selectedDate = DateTime.now();
   final Map<String, List<Map<String, dynamic>>> _exerciseData = {};
+  
+  // 引体向上体重记忆
+  double? _lastPullUpBodyweight;
+  static const String _pullUpBodyweightKey = 'last_pullup_bodyweight';
 
   // 3分化模板
   final Map<String, List<String>> _splitTemplates = {
@@ -28,7 +33,8 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
       '窄距卧推',
     ],
     '拉日': [
-      '引体向上/高位下拉',
+      '引体向上',
+      '高位下拉',
       '杠铃划船',
       '杠铃弯举',
       '哑铃弯举',
@@ -59,6 +65,28 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
   // RPE选项 (6-10)
   List<int> get _rpeOptions {
     return [for (int r = 6; r <= 10; r++) r];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLastPullUpBodyweight();
+  }
+
+  Future<void> _loadLastPullUpBodyweight() async {
+    final prefs = await SharedPreferences.getInstance();
+    final weight = prefs.getDouble(_pullUpBodyweightKey);
+    if (weight != null) {
+      setState(() {
+        _lastPullUpBodyweight = weight;
+      });
+    }
+  }
+
+  Future<void> _savePullUpBodyweight(double weight) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_pullUpBodyweightKey, weight);
+    _lastPullUpBodyweight = weight;
   }
 
   // 显示滚轮选择器对话框
@@ -279,8 +307,12 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
                             setState(() {
                               _selectedExercises[exercise] = value ?? false;
                               if (value == true) {
+                                // 引体向上使用上次输入的体重作为默认值
+                                final defaultWeight = (exercise == '引体向上' && _lastPullUpBodyweight != null)
+                                    ? _lastPullUpBodyweight!
+                                    : 0.0;
                                 _exerciseData[exercise] = [
-                                  {'weight': 0.0, 'reps': 0, 'rpe': null}
+                                  {'weight': defaultWeight, 'reps': 0, 'rpe': null}
                                 ];
                               } else {
                                 _exerciseData.remove(exercise);
@@ -342,8 +374,12 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
             OutlinedButton.icon(
               onPressed: () {
                 setState(() {
+                  // 引体向上使用上次输入的体重作为默认值
+                  final defaultWeight = (exerciseName == '引体向上' && _lastPullUpBodyweight != null)
+                      ? _lastPullUpBodyweight!
+                      : 0.0;
                   _exerciseData[exerciseName]!.add({
-                    'weight': 0.0,
+                    'weight': defaultWeight,
                     'reps': 0,
                     'rpe': null,
                   });
@@ -561,6 +597,10 @@ class _StrengthRecordScreenState extends ConsumerState<StrengthRecordScreen> {
             'reps': setData['reps'],
             'rpe': setData['rpe'],
           });
+          // 如果是引体向上，记住体重
+          if (exerciseName == '引体向上') {
+            _savePullUpBodyweight(setData['weight']);
+          }
         }
       }
     }
