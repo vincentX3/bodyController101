@@ -151,11 +151,99 @@ class StrengthRepository {
     });
   }
 
+  // 更新力量训练记录的组数据
+  Future<void> updateStrengthRecordSets({
+    required int recordId,
+    required List<Map<String, dynamic>> exerciseSets,
+  }) async {
+    await _db.transaction(() async {
+      // 1. 删除原有组数据
+      await (_db.delete(_db.exerciseSets)..where((t) => t.strengthRecordId.equals(recordId))).go();
+      
+      // 2. 插入新的组数据
+      for (var setData in exerciseSets) {
+        await _db.into(_db.exerciseSets).insert(
+          ExerciseSetsCompanion.insert(
+            strengthRecordId: recordId,
+            exerciseName: setData['exerciseName'] as String,
+            setNumber: setData['setNumber'] as int,
+            weight: setData['weight'] as double,
+            reps: setData['reps'] as int,
+            rpe: Value(setData['rpe'] as int?),
+          ),
+        );
+      }
+      
+      // 3. 重新计算总容量并更新记录
+      final totalVolume = calculateTotalVolume(exerciseSets);
+      final durationMinutes = (exerciseSets.length * 2 + 10).clamp(30, 90);
+      
+      await (_db.update(_db.strengthRecords)..where((t) => t.id.equals(recordId))).write(
+        StrengthRecordsCompanion(
+          totalVolume: Value(totalVolume),
+          durationMinutes: Value(durationMinutes),
+        ),
+      );
+    });
+  }
+
   // 删除力量训练记录
   Future<void> deleteStrengthRecord(int id) async {
     await _db.transaction(() async {
       await (_db.delete(_db.exerciseSets)..where((t) => t.strengthRecordId.equals(id))).go();
       await (_db.delete(_db.strengthRecords)..where((t) => t.id.equals(id))).go();
     });
+  }
+
+  // 批量删除力量训练记录
+  Future<void> deleteStrengthRecords(List<int> ids) async {
+    await _db.transaction(() async {
+      for (var id in ids) {
+        await (_db.delete(_db.exerciseSets)..where((t) => t.strengthRecordId.equals(id))).go();
+        await (_db.delete(_db.strengthRecords)..where((t) => t.id.equals(id))).go();
+      }
+    });
+  }
+
+  // 获取指定日期和分化类型的所有记录及其组数据（用于合并展示和编辑）
+  Future<Map<String, dynamic>?> getRecordsByDateAndSplitType(DateTime date, String splitType) async {
+    // 获取该日期的起始和结束时间
+    final dayStart = DateTime(date.year, date.month, date.day);
+    final dayEnd = dayStart.add(const Duration(days: 1));
+
+    // 查询该日期和分化类型的所有记录
+    final records = await (_db.select(_db.strengthRecords)
+          ..where((t) => t.date.isBiggerOrEqualValue(dayStart))
+          ..where((t) => t.date.isSmallerThanValue(dayEnd))
+          ..where((t) => t.splitType.equals(splitType))
+        )
+        .get();
+
+    if (records.isEmpty) return null;
+
+    // 获取所有记录的ID
+    final recordIds = records.map((r) => r.id).toList();
+
+    // 查询所有组数据
+    final allSets = await (_db.select(_db.exerciseSets)
+          ..where((t) => t.strengthRecordId.isIn(recordIds))
+          ..orderBy([(t) => OrderingTerm.asc(t.exerciseName)])
+          ..orderBy([(t) => OrderingTerm.asc(t.setNumber)])
+        )
+        .get();
+
+    // 计算总容量和时长
+    final totalVolume = records.fold<double>(0.0, (sum, r) => sum + r.totalVolume);
+    final totalDuration = records.fold<int>(0, (sum, r) => sum + r.durationMinutes);
+
+    return {
+      'records': records,
+      'recordIds': recordIds,
+      'sets': allSets,
+      'date': dayStart,
+      'splitType': splitType,
+      'totalVolume': totalVolume,
+      'totalDuration': totalDuration,
+    };
   }
 }

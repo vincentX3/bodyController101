@@ -71,6 +71,12 @@ final allStrengthRecordsProvider = FutureProvider((ref) async {
   return repo.getAllStrengthRecords();
 });
 
+// 单条力量训练记录详情Provider（含所有组数据）
+final strengthRecordDetailProvider = FutureProvider.family<Map<String, dynamic>?, int>((ref, recordId) async {
+  final repo = ref.watch(strengthRepositoryProvider);
+  return repo.getStrengthRecordWithSets(recordId);
+});
+
 // 今日力量训练Provider
 final todayStrengthRecordsProvider = FutureProvider((ref) async {
   final repo = ref.watch(strengthRepositoryProvider);
